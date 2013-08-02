@@ -44,14 +44,27 @@ package require Tcl 8.0
 
 namespace eval ::bras {}
 
-# 01-Aug-2013, Nicholas Clark: Changed the path of this installed file
-# to make it portable.
+#------------ Begin Changes --------------#
+# 01-Aug-2013, Nicholas Clark: Changed the path of this 
+# installed file to make it portable.
 #
 # Original: set ::bras::base $INSTALL_DIR/lib/bras-2.3.2
 
-set ::bras::base [file dirname [file nativename [file normalize $argv0]]]
+set originalPath [pwd]
+set scriptPath   $::argv0
+set workingPath  [file dirname $::argv0]
+ 
+while {![catch {file readlink $scriptPath} result]} {
+    cd $workingPath
+    set scriptPath  [file join [pwd] $result]
+    set workingPath [file dirname $scriptPath]
+}
+cd $originalPath
+
+set ::bras::base [file dirname [file nativename [file normalize $scriptPath]]]
 set ::bras::base [file normalize [file join $::bras::base .. lib bras-2.3.2]]
 set ::bras::base [file nativename $::bras::base]
+#------- End Changes ------------#
 
 set auto_path [concat $::bras::base $auto_path]
 package require bras
